@@ -6,7 +6,7 @@ Alcuni steps sono necessari per l'installazione. Innanzitutto assicurarsi di ave
 ```bash
 git clone https://github.com/andreademurtas/prodigit_helper
 ```
-Una volta fatto ciò, è necessario scaricare il web driver geckodriver, disponibile [qui] (https://github.com/mozilla/geckodriver/releases)(fare attenzione a scaricare la vesione giusta per il proprio sistema), e poi estrarlo nella cartella clonata con lo step precedente.
+Una volta fatto ciò, è necessario scaricare il web driver geckodriver, disponibile [qui](https://github.com/mozilla/geckodriver/releases) (fare attenzione a scaricare la vesione giusta per il proprio sistema), e poi estrarlo nella cartella clonata con lo step precedente.
 Come ultimo step, spostarsi nella cartella e installare i requirements:
 ```bash
 cd prodigit_helper
