@@ -8,6 +8,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from getpass import getpass
 
+lista_giorni = ["Lunedi", "Martedi", "Mercoledi", "Giovedi", "Venerdi"]
+
 def orario_setup():
     f = open('orario.csv','r')
     d = {}
@@ -20,11 +22,13 @@ def orario_setup():
     return d
 
 def print_intro():
-    print("Welcome, supported courses are: ")
+    print("__________                   .___.__       .__  __    .__           .__                       \n\\______   \\_______  ____   __| _/|__| ____ |__|/  |_  |  |__   ____ |  | ______   ___________ \n |     ___/\\_  __ \\/  _ \\ / __ | |  |/ ___\\|  \\   __\\ |  |  \\_/ __ \\|  | \\____ \\_/ __ \\_  __ \\\n |    |     |  | \\(  <_> ) /_/ | |  / /_/  >  ||  |   |   Y  \\  ___/|  |_|  |_> >  ___/|  | \\/\n |____|     |__|   \\____/\\____ | |__\\___  /|__||__|   |___|  /\\___  >____/   __/ \\___  >__|   \n                              \\/   /_____/                 \\/     \\/     |__|        \\/")
+    print("")
+    print("Tool per la prenotazione automatica delle aule su Prodigit.\nI corsi attualmente supportati sono:")
     d = orario_setup()
     for i in d.keys():
         print(i)
-    print('\n')
+    print('')
     return d
 
 def date_range(start, end):
@@ -39,84 +43,98 @@ def polish_date(date):
     end_date = date[1].split('-')
     end_date = datetime(int(end_date[2]), int(end_date[1]), int(end_date[0]))
     if start_date.weekday() != 0:
-        print("Start date is not Monday. Quitting.")
+        print("La data iniziale non è Lunedì. Uscendo...")
         quit()
     if start_date <= datetime.now():
-        print("Start date must be at least one day before today. Quitting.")
+        print("Non è possibile prenotare l'aula per oggi o per giorni precedenti. Uscendo...")
         quit()
     if end_date.weekday() != 4:
-        print("End date is not Friday. Quitting.")
+        print("La data finale non è Venerdì. Uscendo...")
         quit()
     if end_date <= start_date:
-        print("End date must be after start date. Quitting.")
+        print("La data finale deve successiva a quella iniziale. Uscendo...")
         quit()
     days = date_range(start_date, end_date)
     if len(days) != 5:
-        print("Not 7 days. Quitting.")
+        print("Il periodo selezionato deve contenere 5 giorni. Uscendo...")
         quit()
     l = []
     for elem in days:
-        l.append(elem.strftime("%d/%m/%y"))
+        l.append(elem.strftime("%d/%m/%Y"))
     return l
 
 def main():
     d = print_intro()
-    corsi_scelti = input("Write courses separated by a comma, as written in the above message (eg. course1,course2,...): ").strip().split()
-    settimana = input("Write the week of interest (monday to friday both included, eg. DD-MM-YYYY,DD-MM-YYYY): ").strip()
+    '''
+    corsi_scelti = input("Scrivi i corsi come li leggi nel messaggio sopra, separati da una virgola (es. corso1,corso2,...): ").strip().split()
+    for corso in corsi_scelti:
+        if corso not in d.keys():
+            print("Uno o più corsi non presenti nel database. Uscendo...")
+            quit()
+    settimana = input("Scrivi il giorno iniziale e quello finale della settimana di interesse, separati da una virgola (Da Lunedì a Venerdì inclusi, es. DD-MM-YYYY,DD-MM-YYYY): ").strip()
     settimana = polish_date(settimana)
-    user_username = input("Write username: ").strip()
-    user_password = getpass("Write password: ").strip()
+    user_username = input("Username: ").strip()
+    user_password = getpass("Password: ").strip()
     opts = Options()
     opts.headless = True
-    print("Spawning Firefox web driver...")
+    print("Lanciando il web driver...")
     browser = Firefox(options=opts)
-    print("Done.")
-    print("Getting https://prodigit.uniroma1.it/...")
+    print("Fatto.")
+    print("Richiedendo https://prodigit.uniroma1.it/...")
     browser.get("https://prodigit.uniroma1.it/")
-    print("Done.")
-    print("Accepting cookies...")
+    print("Fatto.")
+    print("Accettando i cookies...")
     WebDriverWait(browser, 3).until(EC.element_to_be_clickable((By.XPATH,'//*[@id="cookieChoiceDismiss"]'))).click()
     print("Done.")
     username = browser.find_element(By.NAME, "Username")
     password = browser.find_element(By.NAME, "Password")
     username.send_keys(user_username)
     password.send_keys(user_password)
-    print("Authenticating...")
+    print("Facendo il login...")
     browser.find_element(By.XPATH, "//input[@type='submit' and @value='Accedi']").click()
     browser.get("https://prodigit.uniroma1.it/prenotazioni")
     try:
         browser.find_element(By.NAME, "lingua")
     except:
-        print("Login unsuccessful. Quitting.")
+        print("Login non andato a buon fine. Uscendo...")
         quit()
-    print("Done.")
+    print("Fatto.")
 
     for corso in corsi_scelti:
         for entry in d[corso]:
+            yes_or_no = input("Vuoi prenotare la lezione del corso {} di {}? Orario: {} [Y/N]: ".format(corso, entry[1], entry[0]))
+            if yes_or_no != "Y":
+                print("Saltando...")
+                continue
             the_time = entry[0].strip().split('-')
             start_time, end_time = (the_time[0], the_time[1])
 
-            browser.get("https://prodigit.uniroma1.it/prenotazioni")
-            browser.find_element(By.NAME, "Prenota il posto in aula").click()
-    
+            browser.get("https://prodigit.uniroma1.it/prenotazioni/prenotaaule.nsf/prenotaposto-aula-lezioni")
+
             select = Select(browser.find_element(By.ID, "codiceedificio"))
             select.select_by_visible_text(entry[2])
    
             select = Select(browser.find_element(By.NAME, "aula"))
             select.select_by_visible_text(entry[3])
-
+            
             table = browser.find_elements(By.CLASS_NAME, "table-striped")[3]
             for row in table.find_elements(By.CSS_SELECTOR, 'tr'):
                 cells = row.find_elements(By.TAG_NAME, 'td') 
-                if cells[1].text in settimana:
-                    select = Select(cells.find_elements(By.CSS_SELECTOR, 'select')[0])
+                if cells[1].text in settimana and cells[0].text == entry[1]:
+                    select = Select(cells[2].find_element(By.CSS_SELECTOR, 'select'))
                     select.select_by_visible_text(start_time)
-                    select = Select(cells.find_elements(By.CSS_SELECTOR, 'select')[1])
+                    break
+            table = browser.find_elements(By.CLASS_NAME, "table-striped")[3]
+            for row in table.find_elements(By.CSS_SELECTOR, 'tr'):
+                cells = row.find_elements(By.TAG_NAME, 'td') 
+                if cells[1].text in settimana and cells[0].text == entry[1]:
+                    select = Select(cells[3].find_element(By.CSS_SELECTOR, 'select'))
                     select.select_by_visible_text(end_time)
+                    break
             browser.find_element(By.NAME, 'dichiarazione').click()
             browser.find_element(By.ID, 'btnprenota').click()
-
+            print("Fatto")
     browser.quit()
-
+'''
 if __name__ == "__main__":
     main()
