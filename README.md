@@ -1,7 +1,7 @@
-#Prodigit Helper
+## Prodigit Helper
 Un tool che vuole rendere più veloce e immediata la prenotazione delle aule su Prodigit.
 
-#Installazione
+# Installazione
 Alcuni steps sono necessari per l'installazione. Innanzitutto assicurarsi di avere python3.x,pip e git installati, quindi aprire un terminale e clonare la repo:
 ```bash
 git clone https://github.com/andreademurtas/prodigit_helper
@@ -13,10 +13,10 @@ cd prodigit_helper
 pip install -r requirements.txt
 ```
 
-#Utilizzo
+# Utilizzo
 ```bash
 python3 main.py
 ```
 
-#Aggiungere i propri corsi
+# Aggiungere i propri corsi
 Per aggiungere dei corsi, scrivere a <ypno25@protonmail.com>
