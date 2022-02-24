@@ -65,7 +65,7 @@ def polish_date(date):
 
 def main():
     d = print_intro()
-    corsi_scelti = input("Scrivi i corsi come li leggi nel messaggio sopra, separati da una virgola (es. corso1,corso2,...): ").strip().split()
+    corsi_scelti = input("Scrivi i corsi come li leggi nel messaggio sopra, separati da una virgola (es. corso1,corso2,...): ").strip().split(',')
     for corso in corsi_scelti:
         if corso not in d.keys():
             print("Uno o più corsi non presenti nel database. Uscendo...")
