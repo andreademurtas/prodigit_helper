@@ -132,7 +132,7 @@ def main():
                     break
             browser.find_element(By.NAME, 'dichiarazione').click()
             browser.find_element(By.ID, 'btnprenota').click()
-            print("Fatto")
+            print("Fatto.")
     browser.quit()
 if __name__ == "__main__":
     main()
