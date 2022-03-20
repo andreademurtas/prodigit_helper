@@ -66,6 +66,8 @@ def polish_date(date):
 def main():
     d = print_intro()
     corsi_scelti = input("Scrivi i corsi come li leggi nel messaggio sopra, separati da una virgola (es. corso1,corso2,...): ").strip().split(',')
+    for i in range(len(corsi_scelti)):
+        corsi_scelti[i] = corsi_scelti[i].strip()
     for corso in corsi_scelti:
         if corso not in d.keys():
             print("Uno o più corsi non presenti nel database. Uscendo...")
@@ -98,13 +100,15 @@ def main():
         print("Login non andato a buon fine. Uscendo...")
         quit()
     print("Fatto.")
-
+    
+    every_course = input("Vuoi prenotare tutte le lezioni? [Y/N]: ").strip().upper()
     for corso in corsi_scelti:
         for entry in d[corso]:
-            yes_or_no = input("Vuoi prenotare la lezione del corso {} di {}? Orario: {} [Y/N]: ".format(corso, entry[1], entry[0]))
-            if yes_or_no != "Y":
-                print("Saltando...")
-                continue
+            if every_course != "Y":
+                yes_or_no = input("Vuoi prenotare la lezione del corso {} di {}? Orario: {} [Y/N]: ".format(corso, entry[1], entry[0])).strip().upper()
+                if yes_or_no != "Y":
+                    print("Saltando...")
+                    continue
             the_time = entry[0].strip().split('-')
             start_time, end_time = (the_time[0], the_time[1])
 
